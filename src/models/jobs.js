@@ -26,6 +26,12 @@ var JobSchema = new mongoose.Schema({
     type: [String],
     required: [true, 'Tags cannot be empty!'],
     index: true,
+    validate: {
+      validator: function (v) {
+        return v.length > 0 && v.length < 4;
+      },
+      message: 'Minimum one, maximum three tags must be provided.',
+    },
   },
   description: {
     type: String,
@@ -45,10 +51,17 @@ var JobSchema = new mongoose.Schema({
   applyLink: {
     type: String,
     required: [true, 'Apply link/email is required!'],
+    validate: {
+      validator: function (v) {
+        return v.includes('@') || v.includes('http');
+      },
+      message: 'You must provide an email or a link.',
+    },
   },
   key: {
     type: String,
-    default: () => nanoid(48),
+    default: () => nanoid(128),
+    unique: true,
   },
 }, {
   timeStamps: { createdAt: true, updatedAt: true },
