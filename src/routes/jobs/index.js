@@ -1,9 +1,11 @@
 const logger = require('pino')();
-const { Jobs } = require('../../models');
+const { InReviewJobs } = require('../../models');
 
 module.exports = (app) => {
   app.get('/jobs', async (req, res) => {
-    const jobs = await Jobs.find({});
+    const fullJobs = await InReviewJobs.find({});
+    const documents = fullJobs.map(({_doc}) => _doc);
+    const jobs = documents.map(({key, ...properties}) => properties);
     res.send(jobs);
   });
   app.post('/jobs', async (req, res) => {
@@ -38,25 +40,4 @@ module.exports = (app) => {
       res.send(err);
     }
   });
-}
-
-const keyList = [
-  'position', 
-  'companyName', 
-  'companyHeadquarters',
-  'locationRestriction',
-  'tags',
-  'description',
-  'requirements',
-  'applyLink',
-]
-
-function checkKeys(body) {
-  const failedKeys = [];
-  for (let key of keyList) {
-    if (!body.hasOwnProperty(key)) {
-      failedKeys.push(key);
-    }
-  }
-  return failedKeys;
 }
