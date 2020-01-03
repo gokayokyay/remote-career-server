@@ -3,12 +3,22 @@ const { InReviewJobs, Jobs } = require('../../models');
 
 module.exports = (app) => {
   app.get('/jobs', async (req, res) => {
+    logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
     const fullJobs = await Jobs.find({});
     const documents = fullJobs.map(({_doc}) => _doc);
     const jobs = documents.map(({key, ...properties}) => properties);
     res.send(jobs);
   });
+  app.get('/reviewJobs', async (req, res) => {
+    logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
+    const fullReviewJobs = await InReviewJobs.find();
+    const documents = fullReviewJobs.map(({_doc}) => _doc);
+    const jobs = documents.map(({key, ...properties}) => properties);
+    res.send(jobs);
+  });
   app.post('/jobs', async (req, res) => {
+    logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
+    console.log(req.body);
     try {
       const body = req.body;
       const { 
@@ -41,6 +51,8 @@ module.exports = (app) => {
     }
   });
   app.get('/jobs/:postId', async (req, res) => {
+    logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
+
     try {
       const { postId } = req.params;
       const job = await Jobs.findById(postId);
