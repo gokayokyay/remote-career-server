@@ -63,4 +63,10 @@ module.exports = (app) => {
       res.send(err);
     }
   });
+  app.options('/jobs', (req, res) => {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Headers", "X-Requested-With");
+    res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  });
 }
