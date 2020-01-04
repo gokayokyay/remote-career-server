@@ -64,7 +64,7 @@ var JobSchema = new mongoose.Schema({
     unique: true,
   },
 }, {
-  timeStamps: { createdAt: true, updatedAt: true },
+  timestamps: true,
 });
 
 const InReviewJobs = mongoose.model('InReviewJobs', JobSchema);

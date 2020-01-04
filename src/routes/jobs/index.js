@@ -5,8 +5,10 @@ module.exports = (app) => {
   app.get('/jobs', async (req, res) => {
     logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
     const fullJobs = await Jobs.find({});
+    console.log(fullJobs);
     const documents = fullJobs.map(({_doc}) => _doc);
     const jobs = documents.map(({key, ...properties}) => properties);
+    console.log(jobs);
     res.send(jobs);
   });
   app.get('/reviewJobs', async (req, res) => {
@@ -50,12 +52,29 @@ module.exports = (app) => {
       res.send(err);
     }
   });
-  app.get('/jobs/:postId', async (req, res) => {
+  app.get('/jobs/:jobId', async (req, res) => {
     logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
 
     try {
-      const { postId } = req.params;
-      const job = await Jobs.findById(postId);
+      const { jobId } = req.params;
+      const job = await Jobs.findById(jobId);
+      res.send(job);
+    } catch (err) {
+      logger.error(err);
+      console.log(err);
+      res.send(err);
+    }
+  });
+  app.post('/jobs/move/:jobId', async (req, res) => {
+    logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
+    try {
+      const { jobId } = req.params;
+      const reviewedJob = await InReviewJobs.findById(jobId).lean();
+      // console.log(reviewedJob);
+      const { _id, key, createdAt, updatedAt, _v, ...idlessJob } = reviewedJob;
+      console.log(idlessJob);
+      const job = new Jobs(idlessJob);
+      await job.save();
       res.send(job);
     } catch (err) {
       logger.error(err);
