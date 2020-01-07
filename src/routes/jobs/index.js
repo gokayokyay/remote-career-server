@@ -20,7 +20,7 @@ module.exports = (app) => {
   });
   app.post('/jobs', async (req, res) => {
     logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
-    console.log(req.body);
+    // console.log(req.body);
     try {
       const body = req.body;
       const { 
