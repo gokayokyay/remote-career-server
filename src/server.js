@@ -3,7 +3,7 @@ const app = restana();
 const bodyParser = require('body-parser');
 const logger = require('pino')();
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb'}));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const connectDB = require('./database');
