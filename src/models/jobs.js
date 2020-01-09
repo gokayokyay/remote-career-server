@@ -12,7 +12,7 @@ var JobSchema = new mongoose.Schema({
     required: [true, 'Company name is required!\n'],
   },
   companyLogo: {
-    type: Buffer,
+    type: String,
     required: [true, 'Company logo is required\n'],
   },
   companyHeadquarters: {
@@ -60,7 +60,7 @@ var JobSchema = new mongoose.Schema({
   },
   key: {
     type: String,
-    default: () => nanoid(128),
+    default: () => nanoid(256),
     unique: true,
   },
 }, {

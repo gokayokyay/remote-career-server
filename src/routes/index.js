@@ -1,4 +1,4 @@
 module.exports = app => {
   require('./jobs')(app);
-  require('./files')(app);
+  require('./upload')(app);
 };

@@ -19,6 +19,7 @@
   "homepage": "https://github.com/gokayokyay/remote-career-server#readme",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
     "dotenv": "^8.2.0",
     "express-fileupload": "^1.1.6",
     "ibm-cos-sdk": "^1.6.0",

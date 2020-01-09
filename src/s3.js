@@ -18,7 +18,7 @@ const s3 = new IBMCOS.S3({
   endpoint: new IBMCOS.Endpoint(bucketConfig.endpoint),
 });
 
-module.exports.uploadFile = (path) => {
+module.exports.uploadFileWithPath = (path) => {
   return new Promise((resolve, reject) => {
     fs.readFile(path, (err, data) => {
       if (err) {
@@ -39,3 +39,19 @@ module.exports.uploadFile = (path) => {
     });
   });
 };
+
+module.exports.uploadFile = (key, data) => {
+  return new Promise((resolve, reject) => {
+    s3.upload({
+      Bucket: config.bucketName,
+      Key: key,
+      Body: data,
+    }, (s3err, s3data) => {
+      if (s3err) {
+        reject(s3err);
+      } else {
+        resolve(s3data);
+      }
+    });
+  });
+}

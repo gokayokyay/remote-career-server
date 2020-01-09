@@ -7,6 +7,7 @@ const logger = require('pino')();
 app.use(bodyParser.json({ limit: '50mb'}));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
+app.use(require('cors')());
 
 const connectDB = require('./database');
 const registerRoutes = require('./routes');
