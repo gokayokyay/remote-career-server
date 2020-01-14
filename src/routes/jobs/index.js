@@ -5,10 +5,8 @@ module.exports = (app) => {
   app.get('/jobs', async (req, res) => {
     logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
     const fullJobs = await Jobs.find({});
-    console.log(fullJobs);
     const documents = fullJobs.map(({_doc}) => _doc);
     const jobs = documents.map(({key, ...properties}) => properties);
-    console.log(jobs);
     res.send(jobs);
   });
   app.get('/reviewJobs', async (req, res) => {
@@ -32,8 +30,11 @@ module.exports = (app) => {
         tags,
         description,
         requirements,
+        niceToHave,
+        responsibilities,
         applyLink,
       } = body;
+      console.log(body);
       let job = new InReviewJobs({
         position,
         companyName,
@@ -44,6 +45,8 @@ module.exports = (app) => {
         description,
         requirements,
         applyLink,
+        niceToHave,
+        responsibilities,
       });
       await job.save();
       res.send(job);
@@ -57,8 +60,9 @@ module.exports = (app) => {
 
     try {
       const { jobId } = req.params;
-      const job = await Jobs.findById(jobId);
-      res.send(job);
+      const job = await Jobs.findById(jobId).lean();
+      const { key, ...noKeyJob } = job; 
+      res.send(noKeyJob);
     } catch (err) {
       logger.error(err);
       console.log(err);
