@@ -55,6 +55,54 @@ module.exports = (app) => {
       res.send(err);
     }
   });
+  app.put('/jobs', async (req, res) => {
+    logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
+    // console.log(req.body);
+    try {
+      const body = req.body;
+      const { 
+        position, 
+        companyName, 
+        companyLogo,
+        companyHeadquarters,
+        locationRestriction,
+        tags,
+        description,
+        requirements,
+        niceToHave,
+        responsibilities,
+        applyLink,
+        id,
+        key,
+      } = body;
+      console.log(body);
+      let exJob = await Jobs.findById(id).lean();
+      if (exJob.key !== key) {
+        res.send({
+          code: 403,
+          message: 'Keys mismatch',
+        }, 403);
+        return;
+      }
+      let newJob = await Jobs.findByIdAndUpdate({ _id: id }, {
+        position,
+        companyName,
+        companyHeadquarters,
+        companyLogo,
+        locationRestriction,
+        tags,
+        description,
+        requirements,
+        applyLink,
+        niceToHave,
+        responsibilities,
+      }, { new: true });
+      res.send(newJob);
+    } catch (err) {
+      logger.error(err);
+      res.send(err);
+    }
+  });
   app.get('/jobs/:jobId', async (req, res) => {
     logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
 
