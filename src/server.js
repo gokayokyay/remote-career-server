@@ -21,7 +21,7 @@ module.exports.start = async () => {
 
     registerRoutes(app);
 
-    await app.start(process.env.PORT);
+    await app.start(process.env.PORT, '0.0.0.0');
     logger.info(`Server is started on port: ${process.env.PORT}`);
   } catch (err) {
     logger.error(err);

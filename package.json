@@ -25,6 +25,8 @@
     "ibm-cos-sdk": "^1.6.0",
     "mongoose": "^5.8.3",
     "nanoid": "^2.1.8",
+    "nodemailer": "^6.4.2",
+    "nodemailer-mailgun-transport": "^2.0.0",
     "pino": "^5.15.0",
     "restana": "^4.0.0"
   },

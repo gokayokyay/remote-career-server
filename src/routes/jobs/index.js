@@ -86,11 +86,35 @@ module.exports = (app) => {
       res.send(err);
     }
   });
-  app.options('/jobs', (req, res) => {
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Headers", "X-Requested-With");
-    res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    res.send(200);
+  app.post('/jobs/checkkey', async (req, res) => {
+    // IP BAN LATER
+    logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
+    if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('key') || !req.body.hasOwnProperty('jobId')) {
+      res.send({
+        code: 400,
+        message: 'Missing information.',
+      }, 400);
+      return;
+    }
+    try {
+      const { jobId, key } = req.body;
+      const job = await Jobs.findById(jobId).lean();
+      if (job.key !== key) {
+        res.send({
+          code: 403,
+          message: 'Keys mismatch',
+        }, 403);
+        return;
+      }
+      res.send({
+        code: 200,
+        message: {
+          key,
+        },
+      }, 200);
+    } catch (err) {
+      logger.error(err);
+      res.send(err);
+    }
   });
 }
