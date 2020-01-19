@@ -63,6 +63,16 @@ var JobSchema = new mongoose.Schema({
     default: () => nanoid(256),
     unique: true,
   },
+  contactEmail: {
+    type: String,
+    required: [true, 'Contact email is required!\n'],
+    validate: {
+      validator: function (v) {
+        return v.includes('@');
+      },
+      message: 'You must provide an email.\n',
+    },
+  }
 }, {
   timestamps: true,
 });
