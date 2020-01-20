@@ -1,5 +1,5 @@
 require('dotenv').config();
-const http = require("http");
+const http = require("https");
 
 const server = require('./src/server');
 
