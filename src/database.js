@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const IORedis = require("ioredis");
+const redis = new IORedis(process.env.REDIS_URL);
 
 module.exports = () => {
   return new Promise((resolve, reject) => {
@@ -8,3 +10,5 @@ module.exports = () => {
       .catch(err => reject(err));
   });
 };
+// redis.set(123,123,'ex', 86400, 2)
+module.exports.redis = redis;

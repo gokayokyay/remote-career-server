@@ -1,22 +1,25 @@
 const logger = require('pino')();
 const { InReviewJobs, Jobs } = require('../../models');
+const { isBlocked } = require('../../middlewares');
+const { checkAndBlock } = require ('../../utilities');
+const { redis } = require('../../database');
+const transport = require('../../mail');
 
 module.exports = (app) => {
-  app.get('/jobs', async (req, res) => {
-    logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
+  app.get('/jobs', isBlocked, async (req, res) => {
     const fullJobs = await Jobs.find({});
     const documents = fullJobs.map(({_doc}) => _doc);
     const jobs = documents.map(({key, contactEmail, ...properties}) => properties);
     res.send(jobs);
   });
-  app.get('/reviewJobs', async (req, res) => {
-    logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
+  app.get('/reviewJobs', isBlocked, async (req, res) => {
     // IP BAN LATER
     if (!req.headers.hasOwnProperty('x-admin-key') && req.headers['x-admin-key'] !== process.env.ADMIN_KEY) {
       res.send({
         code: 400,
         message: 'Missing information.',
       }, 400);
+      await checkAndBlock(redis, req);
       return;
     }
     const fullReviewJobs = await InReviewJobs.find();
@@ -27,8 +30,7 @@ module.exports = (app) => {
       message: jobs,
     });
   });
-  app.post('/jobs', async (req, res) => {
-    logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
+  app.post('/jobs', isBlocked, async (req, res) => {
     // console.log(req.body);
     try {
       const body = req.body;
@@ -46,7 +48,6 @@ module.exports = (app) => {
         applyLink,
         contactEmail,
       } = body;
-      console.log(body);
       let job = new InReviewJobs({
         position,
         companyName,
@@ -62,15 +63,20 @@ module.exports = (app) => {
         contactEmail,
       });
       await job.save();
+      const mailOptions = {
+        from: `"Remote Career" <${process.env.MAIL_RECIPIENT}>`,
+        to: process.env.MAIL_RECIPIENT,
+        subject: `New Job Posted!`,
+        text: `Hello sir. A new job has been posted by ${companyName}. Please check it.`,
+      };
+      await transport.sendMail(mailOptions);
       res.send(job);
     } catch (err) {
       logger.error(err);
       res.send(err);
     }
   });
-  app.put('/jobs', async (req, res) => {
-    logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
-    // console.log(req.body);
+  app.put('/jobs', isBlocked, async (req, res) => {
     try {
       const body = req.body;
       const { 
@@ -95,6 +101,7 @@ module.exports = (app) => {
           code: 403,
           message: 'Keys mismatch',
         }, 403);
+        await checkAndBlock(redis, req);
         return;
       }
       let newJob = await Jobs.findByIdAndUpdate({ _id: id }, {
@@ -117,8 +124,6 @@ module.exports = (app) => {
     }
   });
   app.get('/jobs/:jobId', async (req, res) => {
-    logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
-
     try {
       const { jobId } = req.params;
       const job = await Jobs.findById(jobId).lean();
@@ -130,14 +135,14 @@ module.exports = (app) => {
       res.send(err);
     }
   });
-  app.post('/reviewjobs/confirm/:jobId', async (req, res) => {
+  app.post('/reviewjobs/confirm/:jobId', isBlocked, async (req, res) => {
     // IP BAN LATER
-    logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
     if (!req.headers.hasOwnProperty('x-admin-key') && req.headers['x-admin-key'] !== process.env.ADMIN_KEY) {
       res.send({
         code: 400,
         message: 'Missing information.',
       }, 400);
+      await checkAndBlock(redis, req);
       return;
     }
     try {
@@ -159,14 +164,14 @@ module.exports = (app) => {
       res.send(err);
     }
   });
-  app.post('/reviewjobs/decline/:jobId', async (req, res) => {
+  app.post('/reviewjobs/decline/:jobId', isBlocked, async (req, res) => {
     // IP BAN LATER
-    logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
     if (!req.headers.hasOwnProperty('x-admin-key') && req.headers['x-admin-key'] !== process.env.ADMIN_KEY) {
       res.send({
         code: 400,
         message: 'Missing information.',
       }, 400);
+      await checkAndBlock(redis, req);
       return;
     }
     // TODO
@@ -185,14 +190,14 @@ module.exports = (app) => {
     //   res.send(err);
     // }
   });
-  app.post('/jobs/checkkey', async (req, res) => {
+  app.post('/jobs/checkkey', isBlocked, async (req, res) => {
     // IP BAN LATER
-    logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
     if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('key') || !req.body.hasOwnProperty('jobId')) {
       res.send({
         code: 400,
         message: 'Missing information.',
       }, 400);
+      await checkAndBlock(redis, req);
       return;
     }
     try {
@@ -203,6 +208,7 @@ module.exports = (app) => {
           code: 403,
           message: 'Keys mismatch',
         }, 403);
+        await checkAndBlock(redis, req);
         return;
       }
       res.send({

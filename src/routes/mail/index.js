@@ -3,7 +3,6 @@ const transport = require('../../mail');
 
 module.exports = app => {
   app.post('/mail', async (req, res) => {
-    logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
     const {
       name,
       email,

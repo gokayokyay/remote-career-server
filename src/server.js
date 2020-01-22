@@ -3,11 +3,13 @@ const app = restana();
 const bodyParser = require('body-parser');
 const fileUpload = require('express-fileupload');
 const logger = require('pino')();
+const middlewares = require('./middlewares');
 
 app.use(bodyParser.json({ limit: '50mb'}));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
 app.use(require('cors')());
+app.use(middlewares.log);
 
 const connectDB = require('./database');
 const registerRoutes = require('./routes');

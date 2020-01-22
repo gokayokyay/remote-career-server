@@ -1,14 +1,18 @@
 const logger = require('pino')();
 
+const { isBlocked } = require('../../middlewares');
+const { redis } = require('../../database');
+const { checkAndBlock } = require ('../../utilities');
+
 module.exports = (app) => {
-  app.post('/admin/checkkey', (req, res) => {
+  app.post('/admin/checkkey', isBlocked, async (req, res) => {
     // IP BAN LATER
-    logger.info(`${req.method} request at ${req.originalUrl} from ${req.socket.localAddress}`);
     if (!req.hasOwnProperty('body') || !req.body.hasOwnProperty('key')) {
       res.send({
         code: 400,
         message: 'Missing information.',
       }, 400);
+      await checkAndBlock(redis, req);
       return;
     }
     const { key } = req.body;
@@ -26,6 +30,7 @@ module.exports = (app) => {
         code: 403,
         message: 'Invalid key.',
       }, 403);
+      await checkAndBlock(redis, req);
     }
   });
 }
