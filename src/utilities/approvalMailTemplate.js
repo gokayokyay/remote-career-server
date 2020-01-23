@@ -177,4 +177,5 @@ module.exports = (emailAddress, position, key, jobId) => {
     
     </html>`,
   };
+  return mailOptions;
 }
