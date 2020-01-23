@@ -1,7 +1,7 @@
 const logger = require('pino')();
 const { InReviewJobs, Jobs } = require('../../models');
 const { isBlocked } = require('../../middlewares');
-const { checkAndBlock } = require ('../../utilities');
+const { checkAndBlock, approvalMailTemplate } = require ('../../utilities');
 const { redis } = require('../../database');
 const transport = require('../../mail');
 
@@ -154,6 +154,7 @@ module.exports = (app) => {
       await job.save();
       await InReviewJobs.findByIdAndRemove(_id);
       // TODO MAIL
+      await transport.sendMail(approvalMailTemplate(job.contactEmail, job.position, job.key, job.id));
       res.send({
         code: 200,
         message: job.id,
